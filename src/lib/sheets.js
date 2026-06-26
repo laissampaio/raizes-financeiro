@@ -18,8 +18,6 @@ const ABA_LANCAMENTOS = 'Lançamentos'
 // dois ranges separados pra evitar que uma sobrescreva a outra ao mapear
 // por nome de cabeçalho.
 const ABA_PROPOSTAS = 'Proposta de projetos'
-const RANGE_LINHAS_CUSTO = `'${ABA_PROPOSTAS}'!A:K`
-const RANGE_DATAS_PROJETO = `'${ABA_PROPOSTAS}'!N:P`
 
 export class SheetsError extends Error {
   constructor(message, code) {
@@ -32,11 +30,57 @@ export class SheetsError extends Error {
 // Le os dados da planilha e retorna ja limpos/tipados, prontos pra virar o
 // JSON que vai no prompt do Claude.
 export async function lerSheets(accessToken) {
-  const ranges = [ABA_LANCAMENTOS, RANGE_LINHAS_CUSTO, RANGE_DATAS_PROJETO]
+  const titulos = await buscarTitulosAbas(accessToken)
+
+  const abaLancamentos = encontrarAba(titulos, ABA_LANCAMENTOS)
+  const abaPropostas = encontrarAba(titulos, ABA_PROPOSTAS)
+  const faltando = [
+    !abaLancamentos && ABA_LANCAMENTOS,
+    !abaPropostas && ABA_PROPOSTAS,
+  ].filter(Boolean)
+  if (faltando.length > 0) {
+    throw new SheetsError(
+      `Não encontrei a(s) aba(s) ${faltando.map((f) => `"${f}"`).join(' e ')} na planilha. ` +
+        `Abas existentes: ${titulos.join(', ')}.`,
+      'ABA_NAO_ENCONTRADA',
+    )
+  }
+
+  const ranges = [
+    `'${abaLancamentos}'`,
+    `'${abaPropostas}'!A:K`,
+    `'${abaPropostas}'!N:P`,
+  ]
     .map((r) => `ranges=${encodeURIComponent(r)}`)
     .join('&')
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values:batchGet?${ranges}`
 
+  const response = await chamarSheetsApi(url, accessToken)
+  const data = await response.json()
+  const valueRanges = data.valueRanges || []
+
+  // batchGet retorna os ranges na mesma ordem em que foram pedidos.
+  const lancamentos = extrairLancamentos(valueRanges[0]?.values)
+  const linhasCusto = rowsToObjects(valueRanges[1]?.values)
+  const linhasDatas = rowsToObjects(valueRanges[2]?.values)
+  const projetos = montarProjetos(linhasCusto, linhasDatas)
+
+  return { projetos, lancamentos }
+}
+
+async function buscarTitulosAbas(accessToken) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}?fields=sheets.properties.title`
+  const response = await chamarSheetsApi(url, accessToken)
+  const data = await response.json()
+  return (data.sheets ?? []).map((s) => s.properties.title)
+}
+
+function encontrarAba(titulos, esperado) {
+  const alvo = normalizarHeader(esperado)
+  return titulos.find((t) => normalizarHeader(t) === alvo)
+}
+
+async function chamarSheetsApi(url, accessToken) {
   let response
   try {
     response = await fetch(url, {
@@ -63,16 +107,7 @@ export async function lerSheets(accessToken) {
     )
   }
 
-  const data = await response.json()
-  const valueRanges = data.valueRanges || []
-
-  // batchGet retorna os ranges na mesma ordem em que foram pedidos.
-  const lancamentos = extrairLancamentos(valueRanges[0]?.values)
-  const linhasCusto = rowsToObjects(valueRanges[1]?.values)
-  const linhasDatas = rowsToObjects(valueRanges[2]?.values)
-  const projetos = montarProjetos(linhasCusto, linhasDatas)
-
-  return { projetos, lancamentos }
+  return response
 }
 
 async function extrairErroGoogle(response) {
