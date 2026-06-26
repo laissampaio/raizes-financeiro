@@ -53,10 +53,20 @@ VITE_GOOGLE_SHEETS_ID=1U7-LGnPc9JktExevHyZMTEY8kPcwzI3yf_1hjsRpaTM
 
 O ID da planilha é a parte da URL entre `/d/` e `/edit`.
 
-A planilha precisa ter duas abas chamadas exatamente **Lançamentos** e
-**Orçamentos**, com as colunas descritas no briefing do projeto (o app lê por
-nome de cabeçalho, não por posição fixa — então a ordem das colunas pode
-variar, mas os nomes não).
+A planilha precisa ter:
+
+- uma aba **Lançamentos** com colunas `Data`, `Categoria`, `Detalhamento`,
+  `Débito`, `Crédito`
+- uma aba **Proposta de projetos** com duas tabelas:
+  - linhas de custo (colunas A:K) — uma linha por item de orçamento, com
+    `Nome Projeto` e `Valor Total`; o app soma `Valor Total` por
+    `Nome Projeto` pra calcular o orçamento total de cada projeto
+  - registro de datas (colunas N:P) — uma linha por projeto, com
+    `Nome Projeto`, `Data Inicio`, `Data Final`
+
+O app lê por nome de cabeçalho (ignorando acento/maiúsculas) e não por
+posição fixa, então a ordem das colunas pode variar, mas os nomes — e as
+faixas de coluna A:K / N:P dentro da aba "Proposta de projetos" — não.
 
 ### 4. Rodar localmente
 

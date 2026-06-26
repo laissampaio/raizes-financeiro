@@ -70,8 +70,21 @@ export function rowsToObjects(values) {
     })
 }
 
-export function getCol(obj, nome) {
-  return obj[nome] !== undefined ? obj[nome] : ''
+export function normalizarHeader(str) {
+  return String(str ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .trim()
+}
+
+// Busca por nome de coluna ignorando acento/maiusculas — a planilha real tem
+// inconsistencias (ex.: "Data Inicio" sem acento) em relacao ao que o
+// briefing original descrevia, então casar por nome exato é fragil demais.
+export function getColApprox(obj, nome) {
+  const alvo = normalizarHeader(nome)
+  const chave = Object.keys(obj).find((k) => normalizarHeader(k) === alvo)
+  return chave !== undefined ? obj[chave] : ''
 }
 
 // Slug estavel a partir do nome do projeto, usado como id de DOM pro
