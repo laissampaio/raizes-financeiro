@@ -6,7 +6,8 @@ analisar, e mostra um dashboard visual de quais projetos estão dentro do
 orçamento esperado considerando o tempo decorrido.
 
 Sem backend: o React lê a Google Sheets API e chama a API da Anthropic direto do
-browser. Hospedagem estática (Netlify, Vercel ou GitHub Pages).
+browser. Hospedagem estática no GitHub Pages, com deploy automático via GitHub
+Actions a cada push em `master`.
 
 ## Aviso de segurança
 
@@ -29,7 +30,8 @@ chave, como mitigação caso ela seja copiada.
 3. Criar credencial → **ID do cliente OAuth** → tipo **Aplicativo da Web**
 4. Em "Origens JavaScript autorizadas", adicionar:
    - `http://localhost:5173` (dev)
-   - a URL de produção, depois do deploy
+   - `https://laissampaio.github.io` (produção — só o domínio, sem o
+     `/raizes-financeiro/` do final, o Google não aceita path nessa lista)
 5. Em "Tela de consentimento OAuth" → adicionar o e-mail da Raízes como
    usuária de teste (enquanto o app não for verificado pelo Google)
 6. Copiar o **Client ID** gerado
@@ -65,16 +67,26 @@ npm run dev
 
 Abre em `http://localhost:5173`.
 
-## Deploy
+## Deploy (GitHub Pages)
 
-```
-npm run build
-```
+O workflow em [.github/workflows/deploy.yml](.github/workflows/deploy.yml) builda e
+publica automaticamente a cada push em `master`. Passos únicos de setup:
 
-Gera a pasta `dist/`, que pode ser publicada em qualquer hosting estático
-(Netlify, Vercel, GitHub Pages). Lembre de configurar as 3 variáveis de
-ambiente também no painel do serviço de hosting escolhido, e de adicionar a
-URL de produção nas origens autorizadas do Client ID OAuth (passo 1.4).
+1. **Settings → Secrets and variables → Actions → New repository secret**,
+   criar os 3 secrets (mesmos nomes do `.env.example`):
+   - `VITE_GOOGLE_CLIENT_ID`
+   - `VITE_ANTHROPIC_API_KEY`
+   - `VITE_GOOGLE_SHEETS_ID`
+2. **Settings → Pages → Source** → selecionar **GitHub Actions**
+3. Dar push em `master` (ou rodar o workflow manualmente em **Actions →
+   Deploy to GitHub Pages → Run workflow**)
+4. Depois do primeiro deploy, o site fica em
+   `https://laissampaio.github.io/raizes-financeiro/`. Adicionar essa origem
+   no Client ID OAuth (passo 1.4) se ainda não tiver feito.
+
+Mudar qualquer um dos 3 secrets depois exige rodar o workflow de novo (push
+vazio ou "Run workflow" manual) — o valor é embutido no build, não lido em
+runtime.
 
 ## Estrutura
 
