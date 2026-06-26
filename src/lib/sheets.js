@@ -11,13 +11,13 @@ const SHEETS_ID = import.meta.env.VITE_GOOGLE_SHEETS_ID
 const ABA_LANCAMENTOS = 'Lançamentos'
 
 // A planilha real não tem uma aba "Orçamentos" separada (como o briefing
-// original supunha) — tem uma aba "Proposta de projetos" com duas tabelas
+// original supunha) — tem uma aba "Proposta dos Projetos" com duas tabelas
 // lado a lado: linhas de custo por item (A:K, várias linhas por projeto,
 // precisa somar "Valor Total") e o registro de datas por projeto (N:P, uma
 // linha por projeto). As duas têm coluna "Nome Projeto", então lemos como
 // dois ranges separados pra evitar que uma sobrescreva a outra ao mapear
 // por nome de cabeçalho.
-const ABA_PROPOSTAS = 'Proposta de projetos'
+const ABA_PROPOSTAS = 'Proposta dos Projetos'
 
 export class SheetsError extends Error {
   constructor(message, code) {
