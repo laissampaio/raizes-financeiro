@@ -5,6 +5,7 @@ import {
   rowsToObjects,
   getColApprox,
   normalizarHeader,
+  localizarLinhaCabecalho,
 } from './parse'
 
 const SHEETS_ID = import.meta.env.VITE_GOOGLE_SHEETS_ID
@@ -61,8 +62,12 @@ export async function lerSheets(accessToken) {
 
   // batchGet retorna os ranges na mesma ordem em que foram pedidos.
   const lancamentos = extrairLancamentos(valueRanges[0]?.values)
-  const linhasCusto = rowsToObjects(valueRanges[1]?.values)
-  const linhasDatas = rowsToObjects(valueRanges[2]?.values)
+  const linhasCusto = linhasComCabecalhoReal(valueRanges[1]?.values, ['Nome Projeto', 'Valor Total'])
+  const linhasDatas = linhasComCabecalhoReal(valueRanges[2]?.values, [
+    'Nome Projeto',
+    'Data Inicio',
+    'Data Final',
+  ])
   const projetos = montarProjetos(linhasCusto, linhasDatas)
 
   return { projetos, lancamentos }
@@ -119,6 +124,14 @@ async function extrairErroGoogle(response) {
   }
 }
 
+// Acha a linha de cabecalho de verdade (em vez de assumir que e a primeira)
+// e so depois mapeia as linhas em objetos por nome de coluna.
+function linhasComCabecalhoReal(values, esperadas) {
+  if (!values || values.length === 0) return []
+  const indice = localizarLinhaCabecalho(values, esperadas)
+  return rowsToObjects(values.slice(indice))
+}
+
 function checarColunas(linhas, obrigatorias, nomeAba) {
   if (linhas.length === 0) return
   const colunas = Object.keys(linhas[0]).map(normalizarHeader)
@@ -132,8 +145,9 @@ function checarColunas(linhas, obrigatorias, nomeAba) {
 }
 
 function extrairLancamentos(values) {
-  const linhas = rowsToObjects(values)
-  checarColunas(linhas, ['Data', 'Categoria', 'Detalhamento', 'Débito'], ABA_LANCAMENTOS)
+  const esperadas = ['Data', 'Categoria', 'Detalhamento', 'Débito']
+  const linhas = linhasComCabecalhoReal(values, esperadas)
+  checarColunas(linhas, esperadas, ABA_LANCAMENTOS)
 
   return linhas
     .filter((row) => String(getColApprox(row, 'Categoria')).trim() === 'Projetos')

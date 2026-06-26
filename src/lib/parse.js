@@ -70,6 +70,26 @@ export function rowsToObjects(values) {
     })
 }
 
+// Acha a linha de cabecalho real entre as primeiras linhas da aba, em vez de
+// assumir que e sempre a linha 0 — a aba "Lançamentos", por exemplo, tem uma
+// linha de filtros/anotações antes da linha com os nomes de coluna de fato
+// ("Crédito"/"Débito"/"Saldo"). Escolhe a linha com mais nomes esperados.
+export function localizarLinhaCabecalho(values, esperadas, maxLinhasVarridas = 5) {
+  let melhorIndice = 0
+  let melhorPontuacao = -1
+
+  for (let i = 0; i < Math.min(maxLinhasVarridas, values.length); i++) {
+    const linha = (values[i] ?? []).map(normalizarHeader)
+    const pontuacao = esperadas.filter((e) => linha.includes(normalizarHeader(e))).length
+    if (pontuacao > melhorPontuacao) {
+      melhorPontuacao = pontuacao
+      melhorIndice = i
+    }
+  }
+
+  return melhorIndice
+}
+
 export function normalizarHeader(str) {
   return String(str ?? '')
     .toLowerCase()
