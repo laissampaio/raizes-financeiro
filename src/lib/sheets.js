@@ -39,8 +39,9 @@ export async function lerSheets(accessToken) {
     )
   }
   if (!response.ok) {
+    const detalhe = await extrairErroGoogle(response)
     throw new SheetsError(
-      `Não foi possível ler a planilha (HTTP ${response.status}).`,
+      `Não foi possível ler a planilha (HTTP ${response.status}${detalhe ? `: ${detalhe}` : ''}).`,
       'HTTP_ERROR',
     )
   }
@@ -53,6 +54,15 @@ export async function lerSheets(accessToken) {
   const projetos = extrairOrcamentos(valueRanges[1]?.values)
 
   return { projetos, lancamentos }
+}
+
+async function extrairErroGoogle(response) {
+  try {
+    const data = await response.json()
+    return data?.error?.message ?? null
+  } catch {
+    return null
+  }
 }
 
 function checarColunas(linhas, obrigatorias, nomeAba) {
