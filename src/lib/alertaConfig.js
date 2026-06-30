@@ -83,5 +83,4 @@ export const FILTROS = [
   { key: 'AMARELO', label: 'Atenção' },
   { key: 'VERDE', label: 'No prazo' },
   { key: 'ABAIXO', label: 'Abaixo do previsto' },
-  { key: 'encerrados', label: 'Encerrados' },
 ]
