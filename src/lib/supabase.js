@@ -2,8 +2,42 @@ import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN
+const GITHUB_REPO = 'laissampaio/raizes-financeiro'
+const SYNC_WORKFLOW = 'sync.yml'
+const SYNC_ESPERA_MS = 100_000
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+export async function dispararSync(onContagem) {
+  if (!GITHUB_TOKEN) throw new Error('VITE_GITHUB_TOKEN não configurado')
+
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${SYNC_WORKFLOW}/dispatches`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'master' }),
+    },
+  )
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '')
+    throw new Error(`GitHub API ${res.status}: ${txt}`)
+  }
+
+  // Contagem regressiva enquanto o runner inicializa e roda sync.py (~100s)
+  const total = Math.ceil(SYNC_ESPERA_MS / 1000)
+  for (let i = total; i > 0; i--) {
+    onContagem?.(i)
+    await new Promise((r) => setTimeout(r, 1000))
+  }
+  onContagem?.(0)
+}
 
 export class SupabaseError extends Error {
   constructor(message, code) {

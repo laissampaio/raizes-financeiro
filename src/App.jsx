@@ -5,7 +5,7 @@ import FiltrosBotoes from './components/FiltrosBotoes'
 import CardProjeto from './components/CardProjeto'
 import CardProjetoSkeleton from './components/CardProjetoSkeleton'
 import ErrorBanner from './components/ErrorBanner'
-import { buscarDados } from './lib/supabase'
+import { buscarDados, dispararSync } from './lib/supabase'
 import { calcularMetricas } from './lib/metricas'
 import { slugProjeto } from './lib/parse'
 import { ALERTA_ORDEM } from './lib/alertaConfig'
@@ -24,6 +24,7 @@ function filtrarProjetos(projetos, filtro) {
 
 function App() {
   const [carregando, setCarregando] = useState(false)
+  const [contagem, setContagem] = useState(null) // null = inativo; número = segundos restantes
   const [erro, setErro] = useState(null)
   const [projetos, setProjetos] = useState(null)
   const [atualizadoEm, setAtualizadoEm] = useState(null)
@@ -45,6 +46,19 @@ function App() {
     } finally {
       setCarregando(false)
     }
+  }
+
+  async function sincronizarEAtualizar() {
+    setErro(null)
+    try {
+      await dispararSync((seg) => setContagem(seg))
+    } catch (err) {
+      setErro('Não foi possível iniciar a sincronização: ' + (err.message ?? err))
+      setContagem(null)
+      return
+    }
+    setContagem(null)
+    carregarDados()
   }
 
   useEffect(() => {
@@ -74,8 +88,9 @@ function App() {
     <div className="pagina">
       <HeaderTopo
         carregando={carregando}
+        contagem={contagem}
         atualizadoEm={atualizadoEm}
-        onAtualizar={carregarDados}
+        onAtualizar={sincronizarEAtualizar}
       />
 
       {erro && <ErrorBanner mensagem={erro} onRetry={carregarDados} />}

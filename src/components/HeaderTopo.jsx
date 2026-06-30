@@ -1,4 +1,11 @@
-function HeaderTopo({ carregando, atualizadoEm, onAtualizar }) {
+function HeaderTopo({ carregando, contagem, atualizadoEm, onAtualizar }) {
+  const sincronizando = contagem !== null
+  const ocupado = carregando || sincronizando
+
+  let labelBotao = 'Atualizar'
+  if (sincronizando) labelBotao = `Sincronizando... (${contagem}s)`
+  else if (carregando) labelBotao = 'Buscando dados...'
+
   return (
     <header className="header-topo">
       <div className="header-titulos">
@@ -12,10 +19,10 @@ function HeaderTopo({ carregando, atualizadoEm, onAtualizar }) {
           type="button"
           className="btn btn-atualizar"
           onClick={onAtualizar}
-          disabled={carregando}
+          disabled={ocupado}
         >
-          <i className={`ti ti-refresh${carregando ? ' girando' : ''}`} aria-hidden="true" />
-          {carregando ? 'Buscando dados...' : 'Atualizar'}
+          <i className={`ti ti-refresh${ocupado ? ' girando' : ''}`} aria-hidden="true" />
+          {labelBotao}
         </button>
       </div>
     </header>
