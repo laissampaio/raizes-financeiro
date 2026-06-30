@@ -264,33 +264,45 @@ class FKCache:
         self._projetos = {}
         self._categorias = {}
         self._pessoas = {}
+        self._aliases = {}
         self.pessoas_criadas = 0
+        self._carregar_aliases()
+
+    def _carregar_aliases(self):
+        """Carrega a tabela dim_projeto_alias para normalizar nomes de projeto."""
+        try:
+            resp = self.db.table("dim_projeto_alias").select("alias,nome_canonical").execute()
+            for row in resp.data:
+                self._aliases[normalize_name(row["alias"])] = row["nome_canonical"]
+            log.info("dim_projeto_alias: %d alias(es) carregado(s)", len(self._aliases))
+        except Exception as e:
+            log.warning("Não foi possível carregar dim_projeto_alias: %s", e)
 
     def get_projeto_id(self, nome):
-        """Busca o projeto pelo nome exato na lista mestra (dim_projeto).
+        """Busca o projeto pelo nome na lista mestra (dim_projeto).
 
-        Não cria projetos novos aqui — só sync_projetos (a lista mestra da
-        aba "Proposta dos Projetos"!N:P) tem autoridade pra isso. Lançamentos
-        e Fluxo Previsto às vezes reusam o mesmo campo de texto livre pra
-        coisas que não são projeto (rótulos de despesa como "FGTS",
-        "Diretor") ou digitam o nome do projeto de forma diferente da lista
-        mestra (ex.: "Santa Barbara" vs "Sta Barbara") — auto-criar nesses
-        casos poluiria dim_projeto com entradas falsas/duplicadas.
+        Aplica dim_projeto_alias antes da busca, normalizando variações de
+        grafia (ex.: "Sta Barbara" → "Santa Barbara 26"). Não cria projetos
+        novos — só sync_projetos tem autoridade pra isso.
         """
         nome = normalize_name(nome)
         if nome == "":
             return None
-        if nome in self._projetos:
-            return self._projetos[nome]
 
-        resp = self.db.table("dim_projeto").select("id").eq("nome", nome).limit(1).execute()
+        # Aplica alias se existir
+        nome_canonical = self._aliases.get(nome, nome)
+
+        if nome_canonical in self._projetos:
+            return self._projetos[nome_canonical]
+
+        resp = self.db.table("dim_projeto").select("id").eq("nome", nome_canonical).limit(1).execute()
         if not resp.data:
-            log.warning('Projeto "%s" não está na lista mestra — projeto_id ficará nulo', nome)
-            self._projetos[nome] = None
+            log.warning('Projeto "%s" não está na lista mestra — projeto_id ficará nulo', nome_canonical)
+            self._projetos[nome_canonical] = None
             return None
 
         projeto_id = resp.data[0]["id"]
-        self._projetos[nome] = projeto_id
+        self._projetos[nome_canonical] = projeto_id
         return projeto_id
 
     def get_categoria_id(self, categoria, detalhamento, detalhamento_p):
