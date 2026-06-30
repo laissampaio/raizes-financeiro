@@ -1,6 +1,11 @@
-function parseLocalDate(dateStr) {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  return new Date(year, month - 1, day)
+function parseInicio(dateStr) {
+  const [year, month] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, 1) // primeiro dia do mês inicial
+}
+
+function parseFim(dateStr) {
+  const [year, month] = dateStr.split('-').map(Number)
+  return new Date(year, month, 0) // último dia do mês final (dia 0 do mês seguinte)
 }
 
 export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
@@ -22,8 +27,8 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
   }
 
   return projetos.map((p) => {
-    const inicio = parseLocalDate(p.data_inicio)
-    const fim = parseLocalDate(p.data_fim)
+    const inicio = parseInicio(p.data_inicio)
+    const fim = parseFim(p.data_fim)
 
     let status
     if (hoje < inicio) status = 'NAO_INICIADO'
