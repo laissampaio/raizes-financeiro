@@ -99,21 +99,37 @@ def parse_decimal(value):
 
 
 def parse_date_dmy(value):
-    """Converte "DD/MM/YYYY" para date (ou None se vazio/inválido)."""
+    """Converte datas para date (ou None se vazio/inválido).
+
+    Aceita:
+    - "DD/MM/YYYY" ou "DD/MM/YY" (formato brasileiro)
+    - Serial numérico do Google Sheets (epoch 30/12/1899), retornado
+      pela Sheets API quando as células não têm formato de data explícito
+    """
     raw = str(value or "").strip()
     if raw == "":
         return None
 
+    # Formato texto DD/MM/YYYY ou DD/MM/YY
     match = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{2,4})$", raw)
-    if not match:
-        return None
+    if match:
+        dia, mes, ano = match.groups()
+        ano = f"20{ano}" if len(ano) == 2 else ano
+        try:
+            return date(int(ano), int(mes), int(dia))
+        except ValueError:
+            return None
 
-    dia, mes, ano = match.groups()
-    ano = f"20{ano}" if len(ano) == 2 else ano
-    try:
-        return date(int(ano), int(mes), int(dia))
-    except ValueError:
-        return None
+    # Serial numérico do Google Sheets (epoch: 30/12/1899)
+    if re.match(r"^\d+\.?\d*$", raw):
+        try:
+            serial = int(float(raw))
+            if 1000 <= serial <= 200000:
+                return date(1899, 12, 30) + timedelta(days=serial)
+        except (ValueError, OverflowError):
+            pass
+
+    return None
 
 
 def parse_date_my(value):
