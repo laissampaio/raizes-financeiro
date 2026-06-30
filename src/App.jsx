@@ -8,10 +8,18 @@ import ErrorBanner from './components/ErrorBanner'
 import { buscarDados } from './lib/supabase'
 import { calcularMetricas } from './lib/metricas'
 import { slugProjeto } from './lib/parse'
+import { ALERTA_ORDEM } from './lib/alertaConfig'
+
+const ALERTA_RANK = Object.fromEntries(ALERTA_ORDEM.map((a, i) => [a, i]))
 
 function filtrarProjetos(projetos, filtro) {
-  if (filtro === 'todos') return projetos
-  return projetos.filter((p) => p.status === 'ATIVO')
+  if (filtro === 'encerrados') return projetos.filter((p) => p.status === 'ENCERRADO')
+  if (filtro === 'todos') {
+    return projetos
+      .filter((p) => p.status === 'ATIVO')
+      .sort((a, b) => (ALERTA_RANK[a.alerta] ?? 99) - (ALERTA_RANK[b.alerta] ?? 99))
+  }
+  return projetos.filter((p) => p.alerta === filtro)
 }
 
 function App() {
@@ -19,7 +27,7 @@ function App() {
   const [erro, setErro] = useState(null)
   const [projetos, setProjetos] = useState(null)
   const [atualizadoEm, setAtualizadoEm] = useState(null)
-  const [filtroAtivo, setFiltroAtivo] = useState('andamento')
+  const [filtroAtivo, setFiltroAtivo] = useState('todos')
   const [destacado, setDestacado] = useState(null)
   const [scrollTarget, setScrollTarget] = useState(null)
 
@@ -44,7 +52,7 @@ function App() {
   }, [])
 
   function handleSelecionarProjeto(nome) {
-    setFiltroAtivo('andamento')
+    setFiltroAtivo('todos')
     setScrollTarget(nome)
   }
 

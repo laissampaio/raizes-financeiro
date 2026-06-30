@@ -75,7 +75,13 @@ export const SUMARIO_BLOCOS = [
   { key: 'ABAIXO', titulo: 'Abaixo do previsto', cor: '#378ADD' },
 ]
 
+export const ALERTA_ORDEM = ['VERMELHO', 'AMARELO', 'VERDE', 'ABAIXO', 'SEM_ORCAMENTO', 'NAO_INICIADO']
+
 export const FILTROS = [
-  { key: 'andamento', label: 'Em Andamento' },
   { key: 'todos', label: 'Todos' },
+  { key: 'VERMELHO', label: 'Críticos' },
+  { key: 'AMARELO', label: 'Atenção' },
+  { key: 'VERDE', label: 'No prazo' },
+  { key: 'ABAIXO', label: 'Abaixo do previsto' },
+  { key: 'encerrados', label: 'Encerrados' },
 ]
