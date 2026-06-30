@@ -9,7 +9,7 @@ function HeaderTopo({ carregando, contagem, atualizadoEm, onAtualizar }) {
   return (
     <header className="header-topo">
       <div className="header-titulos">
-        <h1>Projetos — controle de orçamento</h1>
+        <h1>Projetos — Controle de Orçamento</h1>
         <p>Raízes Desenvolvimento Sustentável</p>
       </div>
 
