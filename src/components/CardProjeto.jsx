@@ -84,7 +84,6 @@ function CardProjeto({ projeto, id, destacado }) {
           )}
         </div>
 
-        {projeto.narrativa && <p className="card-narrativa">{projeto.narrativa}</p>}
       </div>
     </article>
   )

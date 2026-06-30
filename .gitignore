@@ -17,6 +17,10 @@ dist-ssr
 .env.*
 !.env.example
 
+# Google OAuth / service account credential files (never commit)
+client_secret*.json
+raizes-financeiro*.json
+
 # Sync backend (Python) - secrets and local artifacts
 service_account.json
 *service_account*.json

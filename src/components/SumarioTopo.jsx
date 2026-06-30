@@ -1,16 +1,15 @@
 import { SUMARIO_BLOCOS } from '../lib/alertaConfig'
 
-function SumarioTopo({ projetos, resumo, onSelecionarProjeto }) {
+function SumarioTopo({ projetos, onSelecionarProjeto }) {
   return (
     <section className="sumario-grid">
       {SUMARIO_BLOCOS.map((bloco) => {
         const lista = projetos.filter((p) => p.alerta === bloco.key)
-        const contador = resumo?.[bloco.key.toLowerCase()] ?? lista.length
 
         return (
           <div key={bloco.key} className="sumario-bloco" style={{ '--cor-bloco': bloco.cor }}>
             <div className="sumario-bloco-titulo">
-              <span className="contador">{contador}</span>
+              <span className="contador">{lista.length}</span>
               <span className="label">{bloco.titulo}</span>
             </div>
 

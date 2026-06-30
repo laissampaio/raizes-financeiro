@@ -75,13 +75,7 @@ export const SUMARIO_BLOCOS = [
   { key: 'ABAIXO', titulo: 'Abaixo do previsto', cor: '#378ADD' },
 ]
 
-// Usado pelas pills de filtro. "todos" e "encerrados" filtram por status,
-// os demais filtram por alerta.
 export const FILTROS = [
+  { key: 'andamento', label: 'Em Andamento' },
   { key: 'todos', label: 'Todos' },
-  { key: 'VERMELHO', label: 'Críticos' },
-  { key: 'AMARELO', label: 'Atenção' },
-  { key: 'VERDE', label: 'No prazo' },
-  { key: 'ABAIXO', label: 'Abaixo do previsto' },
-  { key: 'encerrados', label: 'Encerrados' },
 ]
