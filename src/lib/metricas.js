@@ -1,11 +1,13 @@
 function parseInicio(dateStr) {
+  if (!dateStr) return null
   const [year, month] = dateStr.split('-').map(Number)
-  return new Date(year, month - 1, 1) // primeiro dia do mês inicial
+  return new Date(year, month - 1, 1)
 }
 
 function parseFim(dateStr) {
+  if (!dateStr) return null
   const [year, month] = dateStr.split('-').map(Number)
-  return new Date(year, month, 0) // último dia do mês final (dia 0 do mês seguinte)
+  return new Date(year, month, 0)
 }
 
 export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
@@ -33,12 +35,13 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
     const fim = parseFim(p.data_fim)
 
     let status
-    if (hoje < inicio) status = 'NAO_INICIADO'
+    if (!inicio || !fim) status = 'NAO_INICIADO'
+    else if (hoje < inicio) status = 'NAO_INICIADO'
     else if (hoje > fim) status = 'ENCERRADO'
     else status = 'ATIVO'
 
-    const duracao = fim - inicio
-    const decorrido = Math.max(0, hoje - inicio)
+    const duracao = inicio && fim ? fim - inicio : 0
+    const decorrido = inicio ? Math.max(0, hoje - inicio) : 0
     const pct_tempo = duracao > 0 ? Math.round(Math.min(100, (decorrido / duracao) * 100)) : 0
 
     const total_gasto = Math.abs(gastoPorId.get(p.id) ?? 0)
@@ -62,7 +65,7 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
     else alerta = 'VERDE'
 
     const fmt = (d) =>
-      d.toLocaleDateString('pt-BR', { month: '2-digit', year: '2-digit' }).replace('/', '/')
+      d ? d.toLocaleDateString('pt-BR', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '—'
 
     return {
       ...p,

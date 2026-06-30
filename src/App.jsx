@@ -42,6 +42,7 @@ function App() {
         new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       )
     } catch (err) {
+      console.error('carregarDados error:', err)
       setErro(err.message || 'Ocorreu um erro inesperado. Tente novamente.')
     } finally {
       setCarregando(false)
