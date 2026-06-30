@@ -17,6 +17,13 @@ dist-ssr
 .env.*
 !.env.example
 
+# Sync backend (Python) - secrets and local artifacts
+service_account.json
+*service_account*.json
+sync/__pycache__/
+sync/.venv/
+sync/venv/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
