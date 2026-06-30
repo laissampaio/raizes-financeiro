@@ -13,9 +13,11 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
   hoje.setHours(0, 0, 0, 0)
 
   const gastoPorId = new Map()
-  for (const { projeto_id, debito } of lancamentos) {
+  const entradaPorId = new Map()
+  for (const { projeto_id, debito, credito } of lancamentos) {
     if (projeto_id) {
       gastoPorId.set(projeto_id, (gastoPorId.get(projeto_id) ?? 0) + (debito ?? 0))
+      entradaPorId.set(projeto_id, (entradaPorId.get(projeto_id) ?? 0) + (credito ?? 0))
     }
   }
 
@@ -39,11 +41,16 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
     const decorrido = Math.max(0, hoje - inicio)
     const pct_tempo = duracao > 0 ? Math.round(Math.min(100, (decorrido / duracao) * 100)) : 0
 
-    const total_gasto = gastoPorId.get(p.id) ?? 0
+    const total_gasto = Math.abs(gastoPorId.get(p.id) ?? 0)
+    const total_entradas = entradaPorId.get(p.id) ?? 0
     const orcBruto = orcPorId.has(p.id) ? orcPorId.get(p.id) : null
     const orcamento_total = orcBruto != null && orcBruto > 0 ? orcBruto : null
     const pct_gasto = orcamento_total ? Math.round((total_gasto / orcamento_total) * 100) : null
     const saldo_restante = orcamento_total != null ? orcamento_total - total_gasto : null
+    // valor_total_projeto e pct_entradas ficarão TBD até ser preenchido
+    const valor_total_projeto = null
+    const pct_entradas = null
+    const saldo_entradas = null
 
     let alerta
     if (status === 'ENCERRADO') alerta = 'ENCERRADO'
@@ -67,6 +74,10 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
       orcamento_total,
       pct_gasto,
       saldo_restante,
+      total_entradas,
+      valor_total_projeto,
+      pct_entradas,
+      saldo_entradas,
       alerta,
     }
   })

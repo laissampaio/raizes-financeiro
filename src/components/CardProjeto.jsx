@@ -1,5 +1,7 @@
 import { getAlertaConfig, getStatusLabel, TEMPO_COR } from '../lib/alertaConfig'
 
+const ENTRADA_COR = '#8B5CF6'
+
 function formatBRL(valor) {
   if (valor == null) return '—'
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -55,7 +57,7 @@ function CardProjeto({ projeto, id, destacado }) {
 
           {mostrarBarraGasto && (
             <div className="barra-linha">
-              <span className="barra-label">Orçamento</span>
+              <span className="barra-label">Orçamento Gasto</span>
               <div className="barra-trilha">
                 <div
                   className="barra-progresso"
@@ -65,23 +67,49 @@ function CardProjeto({ projeto, id, destacado }) {
               <span className="barra-pct">{formatPct(projeto.pct_gasto)}</span>
             </div>
           )}
+
+          <div className="barra-linha">
+            <span className="barra-label">Total Entradas</span>
+            <div className="barra-trilha">
+              <div
+                className="barra-progresso"
+                style={{ width: `${clampPct(projeto.pct_entradas)}%`, '--cor-barra': ENTRADA_COR }}
+              />
+            </div>
+            <span className="barra-pct">{formatPct(projeto.pct_entradas)}</span>
+          </div>
         </div>
 
         <div className="card-valores">
-          <div className="item">
-            <span className="rotulo">Orçamento total</span>
-            <span className="valor">{formatBRL(projeto.orcamento_total)}</span>
-          </div>
-          <div className="item">
-            <span className="rotulo">Total gasto</span>
-            <span className="valor">{formatBRL(projeto.total_gasto)}</span>
-          </div>
-          {projeto.saldo_restante != null && (
+          <div className="card-valores-linha">
+            <div className="item">
+              <span className="rotulo">Orçamento total</span>
+              <span className="valor">{formatBRL(projeto.orcamento_total)}</span>
+            </div>
+            <div className="item">
+              <span className="rotulo">Orçamento gasto</span>
+              <span className="valor">{formatBRL(projeto.total_gasto)}</span>
+            </div>
             <div className="item">
               <span className="rotulo">Saldo restante</span>
               <span className="valor">{formatBRL(projeto.saldo_restante)}</span>
             </div>
-          )}
+          </div>
+
+          <div className="card-valores-linha">
+            <div className="item">
+              <span className="rotulo">Valor total do projeto</span>
+              <span className="valor">TBD</span>
+            </div>
+            <div className="item">
+              <span className="rotulo">Total entradas</span>
+              <span className="valor">{formatBRL(projeto.total_entradas)}</span>
+            </div>
+            <div className="item">
+              <span className="rotulo">Saldo restante</span>
+              <span className="valor">—</span>
+            </div>
+          </div>
         </div>
 
       </div>
