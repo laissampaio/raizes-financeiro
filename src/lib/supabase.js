@@ -53,7 +53,8 @@ export async function buscarDados() {
     supabase
       .from('fact_lancamentos')
       .select('projeto_id,debito,credito')
-      .not('projeto_id', 'is', null),
+      .not('projeto_id', 'is', null)
+      .limit(10000),
     supabase
       .from('fact_orcamento_linhas')
       .select('projeto_id,valor_total')
