@@ -477,7 +477,24 @@ def sync_orcamento(db: Client, reader: SheetsReader, fk: FKCache):
 def sync_lancamentos(db: Client, reader: SheetsReader, fk: FKCache):
     values = reader.ler_range(ABA_LANCAMENTOS)
     esperadas = ["Data", "Categoria", "Detalhamento", "Crédito", "Débito"]
+
+    # Debug: log raw headers and first few data rows to diagnose date parsing
+    if values:
+        log.info("fact_lancamentos DEBUG: total raw rows=%d", len(values))
+        log.info("fact_lancamentos DEBUG: row[0] (headers?)=%r", values[0][:10] if values[0] else [])
+        if len(values) > 1:
+            log.info("fact_lancamentos DEBUG: row[1]=%r", values[1][:10])
+        if len(values) > 2:
+            log.info("fact_lancamentos DEBUG: row[2]=%r", values[2][:10])
+
     linhas = linhas_como_dicts(values, esperadas)
+
+    # Debug: log what keys we found and first date value
+    if linhas:
+        log.info("fact_lancamentos DEBUG: dict keys=%r", list(linhas[0].keys())[:10])
+        log.info("fact_lancamentos DEBUG: first 'Data' value=%r", get_col(linhas[0], "Data"))
+        if len(linhas) > 1:
+            log.info("fact_lancamentos DEBUG: second 'Data' value=%r", get_col(linhas[1], "Data"))
 
     registros = []
     ignoradas_sem_data = 0
