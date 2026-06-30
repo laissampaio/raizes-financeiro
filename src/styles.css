@@ -431,7 +431,11 @@ button {
 .card-valores-linha {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;
+}
+
+.card-valores-linha .item {
+  flex: 1;
+  min-width: 0;
 }
 
 .card-valores .item .rotulo {
