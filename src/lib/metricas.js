@@ -18,15 +18,15 @@ export function calcularMetricas({ projetos, lancamentos, orcamentos }) {
   const entradaPorId = new Map()
   for (const { projeto_id, debito, credito } of lancamentos) {
     if (projeto_id) {
-      gastoPorId.set(projeto_id, (gastoPorId.get(projeto_id) ?? 0) + (debito ?? 0))
-      entradaPorId.set(projeto_id, (entradaPorId.get(projeto_id) ?? 0) + (credito ?? 0))
+      gastoPorId.set(projeto_id, (gastoPorId.get(projeto_id) ?? 0) + Number(debito ?? 0))
+      entradaPorId.set(projeto_id, (entradaPorId.get(projeto_id) ?? 0) + Number(credito ?? 0))
     }
   }
 
   const orcPorId = new Map()
   for (const { projeto_id, valor_total } of orcamentos) {
     if (projeto_id && valor_total != null) {
-      orcPorId.set(projeto_id, (orcPorId.get(projeto_id) ?? 0) + valor_total)
+      orcPorId.set(projeto_id, (orcPorId.get(projeto_id) ?? 0) + Number(valor_total))
     }
   }
 

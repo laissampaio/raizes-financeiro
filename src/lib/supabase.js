@@ -48,13 +48,8 @@ export class SupabaseError extends Error {
 }
 
 export async function buscarDados() {
-  const [resProjetos, resGastos, resOrcamentos] = await Promise.all([
+  const [resProjetos, resOrcamentos] = await Promise.all([
     supabase.from('dim_projeto').select('id,nome,data_inicio,data_fim').order('nome'),
-    supabase
-      .from('fact_lancamentos')
-      .select('projeto_id,debito,credito')
-      .not('projeto_id', 'is', null)
-      .limit(10000),
     supabase
       .from('fact_orcamento_linhas')
       .select('projeto_id,valor_total')
@@ -63,14 +58,29 @@ export async function buscarDados() {
 
   if (resProjetos.error)
     throw new SupabaseError(`Erro ao buscar projetos: ${resProjetos.error.message}`, 'FETCH')
-  if (resGastos.error)
-    throw new SupabaseError(`Erro ao buscar lançamentos: ${resGastos.error.message}`, 'FETCH')
   if (resOrcamentos.error)
     throw new SupabaseError(`Erro ao buscar orçamentos: ${resOrcamentos.error.message}`, 'FETCH')
 
+  // Supabase PostgREST tem max_rows=1000 por página; busca todas as páginas
+  const PAGE = 1000
+  const lancamentos = []
+  let offset = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('fact_lancamentos')
+      .select('projeto_id,debito,credito')
+      .not('projeto_id', 'is', null)
+      .range(offset, offset + PAGE - 1)
+    if (error) throw new SupabaseError(`Erro ao buscar lançamentos: ${error.message}`, 'FETCH')
+    if (!data || data.length === 0) break
+    lancamentos.push(...data)
+    if (data.length < PAGE) break
+    offset += PAGE
+  }
+
   return {
     projetos: resProjetos.data,
-    lancamentos: resGastos.data,
+    lancamentos,
     orcamentos: resOrcamentos.data,
   }
 }
