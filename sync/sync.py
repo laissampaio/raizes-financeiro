@@ -154,7 +154,10 @@ class SheetsReader:
             import json
             import tempfile
 
-            info = json.loads(base64.b64decode(base64_creds))
+            # Strip whitespace/newlines and fix padding before decoding
+            cleaned = base64_creds.strip().replace('\n', '').replace('\r', '').replace(' ', '')
+            cleaned += '=' * (-len(cleaned) % 4)
+            info = json.loads(base64.b64decode(cleaned))
             creds = service_account.Credentials.from_service_account_info(
                 info, scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"]
             )
