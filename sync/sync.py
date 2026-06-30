@@ -478,23 +478,36 @@ def sync_lancamentos(db: Client, reader: SheetsReader, fk: FKCache):
     values = reader.ler_range(ABA_LANCAMENTOS)
     esperadas = ["Data", "Categoria", "Detalhamento", "Crédito", "Débito"]
 
-    # Debug: log raw headers and first few data rows to diagnose date parsing
-    if values:
-        log.info("fact_lancamentos DEBUG: total raw rows=%d", len(values))
-        log.info("fact_lancamentos DEBUG: row[0] (headers?)=%r", values[0][:10] if values[0] else [])
-        if len(values) > 1:
-            log.info("fact_lancamentos DEBUG: row[1]=%r", values[1][:10])
-        if len(values) > 2:
-            log.info("fact_lancamentos DEBUG: row[2]=%r", values[2][:10])
+    # A aba Lançamentos tem dois cabeçalhos empilhados separados por uma linha vazia:
+    #   Row 0: tem "Data" em col 0, mas "Saldo em" / "31/12/24" nas colunas de valor
+    #   Row 1: vazia
+    #   Row 2: tem "Crédito"/"Débito" nas colunas de valor, mas "preci" em col 0
+    # localizar_linha_cabecalho escolhe row 2 por ter mais matches (Crédito+Débito),
+    # deixando "Data" sem cabeçalho e zerando todos os lançamentos.
+    # Solução: mesclar os dois cabeçalhos — para cada coluna, preferir o nome da
+    # row 2 se for uma coluna esperada; caso contrário usar o nome da row 0.
+    if len(values) >= 3 and not values[1]:
+        esperadas_norm = {_normalize_header(e) for e in esperadas}
+        row0 = values[0]
+        row2 = values[2]
+        n = max(len(row0), len(row2))
+        header = []
+        for i in range(n):
+            h2 = str(row2[i] if i < len(row2) else "").strip()
+            h0 = str(row0[i] if i < len(row0) else "").strip()
+            header.append(h2 if _normalize_header(h2) in esperadas_norm else h0)
 
-    linhas = linhas_como_dicts(values, esperadas)
-
-    # Debug: log what keys we found and first date value
-    if linhas:
-        log.info("fact_lancamentos DEBUG: dict keys=%r", list(linhas[0].keys())[:10])
-        log.info("fact_lancamentos DEBUG: first 'Data' value=%r", get_col(linhas[0], "Data"))
-        if len(linhas) > 1:
-            log.info("fact_lancamentos DEBUG: second 'Data' value=%r", get_col(linhas[1], "Data"))
+        linhas = []
+        for row in values[3:]:
+            if not any(str(c or "").strip() for c in row):
+                break
+            item = {}
+            for i, col_name in enumerate(header):
+                if col_name:
+                    item[col_name] = row[i] if i < len(row) else ""
+            linhas.append(item)
+    else:
+        linhas = linhas_como_dicts(values, esperadas)
 
     registros = []
     ignoradas_sem_data = 0
