@@ -1,6 +1,7 @@
 import { getAlertaConfig, getStatusLabel, TEMPO_COR } from '../lib/alertaConfig'
 
-const ENTRADA_COR = '#8B5CF6'
+const GASTO_COR = '#F97316'
+const ENTRADA_COR = '#10B981'
 
 function formatBRL(valor) {
   if (valor == null) return '—'
@@ -61,7 +62,7 @@ function CardProjeto({ projeto, id, destacado }) {
               <div className="barra-trilha">
                 <div
                   className="barra-progresso"
-                  style={{ width: `${clampPct(projeto.pct_gasto)}%`, '--cor-barra': cfg.barGasto }}
+                  style={{ width: `${clampPct(projeto.pct_gasto)}%`, '--cor-barra': GASTO_COR }}
                 />
               </div>
               <span className="barra-pct">{formatPct(projeto.pct_gasto)}</span>
