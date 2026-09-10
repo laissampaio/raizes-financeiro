@@ -113,24 +113,17 @@ def update_data(x_password: str = Header(None, alias="X-Password")):
 
 def run_extraction(xlsx_path: str) -> dict:
     """Run the extraction pipeline and return the DATA dict."""
-    # Inline the extraction logic by importing extract with the path overridden
-    import importlib.util, sys, types
+    import io, contextlib
+    from pathlib import Path
 
-    # Patch the XLSX_PATH constant before importing
-    spec = importlib.util.spec_from_file_location("extract", "/app/extract.py")
-    mod = importlib.util.module_from_spec(spec)
-    # Override the path
-    original = None
-    with open("/app/extract.py") as f:
+    extract_py = str(Path(__file__).parent / "extract.py")
+    with open(extract_py) as f:
         src = f.read().replace(
             'XLSX_PATH = "/home/claude/raizes_data_fresh.xlsx"',
             f'XLSX_PATH = {xlsx_path!r}'
         )
-    # Execute modified source
+    # Execute the script — it prints JSON, which we capture
     ns = {}
-    exec(compile(src, "extract.py", "exec"), ns)
-    # The script prints JSON — capture it
-    import io, contextlib
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         exec(compile(src, "extract.py", "exec"), ns)
