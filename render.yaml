@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: raizes-dashboard-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GOOGLE_SHEETS_FILE_ID
+        value: 1U7-LGnPc9JktExevHyZMTEY8kPcwzI3yf_1hjsRpaTM
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false   # set manually in Render dashboard (paste JSON contents)
+      - key: DASHBOARD_PASSWORD
+        sync: false   # set manually in Render dashboard
