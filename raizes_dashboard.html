@@ -1417,7 +1417,7 @@ renderPrevisao();
 
 // ─── Password protection ───
 const SESSION_KEY = 'raizes_auth';
-const API_URL = 'https://raizes-dashboard-api.onrender.com'; // update after Render deploy
+const API_URL = 'https://raizes-financeiro.onrender.com';
 
 function checkPassword(){
   const pwd = document.getElementById('pwd-input').value;
@@ -1437,7 +1437,7 @@ function checkPassword(){
   })
   .catch(()=>{
     // Fallback: offline mode — compare against embedded hash
-    const HASH = '%%PASSWORD_HASH%%';
+    const HASH = '8c9a4b583733da8485ae21a33177617b435feadd4ef4b675e9e9e0037e5780af';
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(pwd))
       .then(buf => {
         const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
