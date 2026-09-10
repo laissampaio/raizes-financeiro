@@ -34,7 +34,7 @@ app = FastAPI(title="Raízes Dashboard API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://1secondtask.com", "http://localhost:*"],
+    allow_origins=["https://raizes.1secondtask.com", "http://localhost:5500"],
     allow_credentials=True,
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
