@@ -117,7 +117,7 @@
     <div style="font-size:13px; color:var(--ink-soft); margin-bottom:28px;">Painel Financeiro · Acesso restrito</div>
     <input id="pwd-input" type="password" placeholder="Senha" autofocus
       style="width:100%; padding:10px 14px; border:1px solid var(--line); border-radius:8px;
-             font-size:14px; color:var(--ink); background:var(--surface); box-sizing:border-box; margin-bottom:10px;"
+             font-size:14px; color:var(--ink); background:var(--panel); box-sizing:border-box; margin-bottom:10px;"
       onkeydown="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()" style="
       width:100%; padding:10px; border:none; border-radius:8px;
@@ -134,8 +134,8 @@
   <div class="brand"><b>Raízes</b><span>Painel Financeiro</span></div>
   <div class="meta" id="meta-info"></div>
   <button id="btn-update" onclick="atualizarDados()" style="
-    padding:6px 14px; border:1px solid var(--line); border-radius:7px;
-    background:var(--surface); color:var(--ink); font-size:12.5px;
+    padding:6px 14px; border:1px solid rgba(242,239,230,.35); border-radius:7px;
+    background:rgba(255,255,255,.1); color:#f2efe6; font-size:12.5px; font-weight:600;
     cursor:pointer; display:flex; align-items:center; gap:6px;">
     ↻ Atualizar dados
   </button>
