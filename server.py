@@ -78,26 +78,6 @@ def verify_password(x_password: str = Header(None, alias="X-Password")):
         raise HTTPException(status_code=401, detail="Senha incorreta")
     return {"ok": True}
 
-@app.post("/api/debug/proposta")
-def debug_proposta(x_password: str = Header(None, alias="X-Password")):
-    """TEMP DEBUG — dump raw rows from 'Proposta dos Projetos' mentioning Barbara."""
-    if x_password != DASHBOARD_PASSWORD:
-        raise HTTPException(status_code=401, detail="Senha incorreta")
-    import openpyxl
-    xlsx_bytes = download_xlsx(FILE_ID)
-    wb = openpyxl.load_workbook(BytesIO(xlsx_bytes), data_only=True)
-    ws = wb['Proposta dos Projetos']
-    out = []
-    for i, r in enumerate(ws.iter_rows(min_row=4, values_only=True), start=4):
-        a = str(r[0]) if len(r) > 0 and r[0] else ""
-        n = str(r[13]) if len(r) > 13 and r[13] else ""
-        if "arbara" in a or "arbara" in n:
-            out.append({"row": i, "A": r[0], "B": r[1] if len(r)>1 else None,
-                        "C": r[2] if len(r)>2 else None, "I": r[8] if len(r)>8 else None,
-                        "N": r[13] if len(r)>13 else None, "O": r[14] if len(r)>14 else None,
-                        "P": r[15] if len(r)>15 else None, "Q": r[16] if len(r)>16 else None})
-    return {"rows": out}
-
 @app.post("/api/update")
 def update_data(x_password: str = Header(None, alias="X-Password")):
     if x_password != DASHBOARD_PASSWORD:

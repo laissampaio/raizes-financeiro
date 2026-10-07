@@ -318,7 +318,7 @@ real_by_proj_det = defaultdict(lambda: defaultdict(lambda:{'credito':0.0,'debito
 
 for r in prop_rows:
     proj = norm_proj(r[0]) if r[0] else None
-    det  = norm_str(r[2]) if len(r)>2 else None
+    det  = norm_str(r[1]) if len(r)>1 else None
     val  = floatv(r[8]) if len(r)>8 else 0
     if det and val:
         plan_by_det[det] += val
