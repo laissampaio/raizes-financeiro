@@ -26,7 +26,9 @@ CAT_ALIASES = {'Despesas com equipe':'Despesas com Equipe','Despesas com equipe 
 PROJ_ALIASES = {'Almenara ':'Almenara','Maria da Fé ':'Maria da Fé','re.green 2':'Re.green 2',
                 're.green2':'Re.green 2','Re.green2':'Re.green 2','sta barbara':'Santa Barbara',
                 'Sta Barbara':'Santa Barbara','trs arbo':'TRs Arbo','Trs Arbo':'TRs Arbo',
-                'unesco':'UNESCO','Unesco':'UNESCO','vli':'VLI'}
+                'unesco':'UNESCO','Unesco':'UNESCO','vli':'VLI',
+                'Vale Cartimbau':'Vale do Catimbau','Vale do Cartimbau':'Vale do Catimbau',
+                'vale cartimbau':'Vale do Catimbau','vale do cartimbau':'Vale do Catimbau'}
 
 def norm_cat(v):
     if not v: return None
@@ -112,8 +114,13 @@ last_real_date  = tx[-1]['data']
 last_real_month = last_real_date.month
 
 def futuro_ym(mes_num):
-    year = last_real_date.year if mes_num >= last_real_month else last_real_date.year + 1
-    return f"{year}-{mes_num:02d}"
+    # Fluxo futuro só tem o mês (sem ano). Considera até 3 meses para trás como
+    # lançamentos previstos ainda não realizados (mesmo ano/ano anterior) e os
+    # demais como os próximos meses — ex.: em nov/26, OUT→2026-10, JAN→2027-01.
+    delta = (mes_num - last_real_month) % 12
+    if delta >= 9: delta -= 12
+    total = last_real_date.year * 12 + (last_real_month - 1) + delta
+    return f"{total // 12}-{total % 12 + 1:02d}"
 
 # ── 2. MONTHLY ──
 monthly_dict = defaultdict(lambda: {'creditos':0.0,'debitos':0.0,'saldo_fim':None,'previsto':False})
@@ -506,6 +513,7 @@ for t in tx:
     real_prev_2026[cat_real][tipo][det]['d'][mes] += t['debito']
 
 for t in tx_futuro:
+    if not futuro_ym(t['mes_num']).startswith('2026-'): continue  # Previsão 2026 só recebe meses de 2026
     cat_real, tipo = get_cat_tipo_for_lanc(t)
     det = t['detalhamento'] or t['cat'] or 'Sem Categoria'
     mes_num = t['mes_num'] - 1
